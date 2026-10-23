@@ -1,0 +1,452 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkyBook | Flight Reservation</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        header {
+            background: #0f2d52;
+            color: white;
+            padding: 22px 8%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        header h1 {
+            font-size: 26px;
+        }
+
+        header span {
+            color: #38bdf8;
+        }
+
+        .hero {
+            background: linear-gradient(120deg, #0f2d52, #176b9b);
+            color: white;
+            text-align: center;
+            padding: 48px 20px;
+        }
+
+        .hero h2 {
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+
+        .hero p {
+            color: #dbeafe;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .search-box {
+            background: white;
+            padding: 22px;
+            border-radius: 12px;
+            box-shadow: 0 4px 14px #00000010;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+        }
+
+        input, select, button {
+            padding: 12px;
+            border-radius: 7px;
+            border: 1px solid #cbd5e1;
+            font-size: 15px;
+        }
+
+        input, select {
+            flex: 1;
+            min-width: 160px;
+        }
+
+        button {
+            background: #0878c9;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #075da0;
+        }
+
+        .section-title {
+            margin-bottom: 18px;
+            font-size: 23px;
+        }
+
+        #flightList {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 18px;
+        }
+
+        .flight-card {
+            background: white;
+            padding: 22px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 12px #00000008;
+        }
+
+        .flight-card h3 {
+            color: #075da0;
+            margin-bottom: 14px;
+        }
+
+        .route {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        .flight-card p {
+            margin: 9px 0;
+            color: #475569;
+        }
+
+        .price {
+            font-size: 23px;
+            font-weight: bold;
+            color: #0f766e;
+            margin: 15px 0;
+        }
+
+        .flight-card button {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .booking-panel {
+            background: white;
+            padding: 24px;
+            margin-top: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 14px #00000010;
+        }
+
+        .booking-panel input {
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        .booking-panel button {
+            margin-top: 8px;
+        }
+
+        #message {
+            margin-top: 18px;
+            line-height: 1.8;
+            overflow-wrap: anywhere;
+        }
+
+        footer {
+            background: #0f2d52;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+        }
+
+        @media (max-width: 600px) {
+            .hero h2 {
+                font-size: 25px;
+            }
+
+            header {
+                padding: 18px 5%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>✈️ Sky<span>Book</span></h1>
+    <p>Flight Reservation System</p>
+</header>
+
+<section class="hero">
+    <h2>Find Your Next Flight</h2>
+    <p>Search flights, compare prices, and book your tickets.</p>
+</section>
+
+<main class="container">
+
+    <section class="search-box">
+        <input
+            type="text"
+            id="destination"
+            placeholder="Enter destination (e.g. Goa)"
+        >
+
+        <select id="sortOption">
+            <option value="default">Default Order</option>
+            <option value="price">Price: Low to High</option>
+        </select>
+
+        <button onclick="searchFlights()">Search Flights</button>
+        <button onclick="resetFlights()">Show All</button>
+    </section>
+
+    <h2 class="section-title">Available Flights</h2>
+
+    <section id="flightList"></section>
+
+    <section class="booking-panel" id="bookingPanel">
+        <h2>🎫 Book Your Ticket</h2>
+
+        <form id="bookingForm">
+            <input
+                type="text"
+                id="passengerName"
+                placeholder="Passenger Name"
+                required
+            >
+
+            <input
+                type="number"
+                id="flightNumber"
+                placeholder="Flight Number"
+                min="1"
+                required
+            >
+
+            <input
+                type="number"
+                id="ticketCount"
+                placeholder="Number of Tickets"
+                min="1"
+                required
+            >
+
+            <button type="submit">Confirm Booking</button>
+        </form>
+
+        <div id="message" aria-live="polite"></div>
+    </section>
+
+</main>
+
+<footer>
+    <p>SkyBook Flight Reservation System | Data Structures Project</p>
+    <p>Searching and Sorting Algorithms</p>
+</footer>
+
+<script>
+    const flights = [
+        {
+            no: 104,
+            airline: "IndiGo",
+            source: "Pune",
+            destination: "Delhi",
+            price: 5200,
+            seats: 5
+        },
+        {
+            no: 101,
+            airline: "Air India",
+            source: "Mumbai",
+            destination: "Pune",
+            price: 2800,
+            seats: 4
+        },
+        {
+            no: 105,
+            airline: "Akasa Air",
+            source: "Pune",
+            destination: "Goa",
+            price: 3100,
+            seats: 6
+        },
+        {
+            no: 102,
+            airline: "IndiGo",
+            source: "Delhi",
+            destination: "Mumbai",
+            price: 6100,
+            seats: 3
+        },
+        {
+            no: 103,
+            airline: "Air India",
+            source: "Pune",
+            destination: "Bengaluru",
+            price: 4500,
+            seats: 2
+        }
+    ];
+
+    const bookings = [];
+
+    function displayFlights(data) {
+        const list = document.getElementById("flightList");
+        list.innerHTML = "";
+
+        if (data.length === 0) {
+            list.innerHTML = "<p>No matching flights found.</p>";
+            return;
+        }
+
+        data.forEach(flight => {
+            const card = document.createElement("article");
+            card.className = "flight-card";
+
+            const title = document.createElement("h3");
+            title.textContent = `${flight.airline} | Flight ${flight.no}`;
+
+            const route = document.createElement("div");
+            route.className = "route";
+            route.textContent =
+                `${flight.source} → ${flight.destination}`;
+
+            const seats = document.createElement("p");
+            seats.textContent = `Available Seats: ${flight.seats}`;
+
+            const price = document.createElement("div");
+            price.className = "price";
+            price.textContent = `₹${flight.price.toLocaleString("en-IN")}`;
+
+            const bookButton = document.createElement("button");
+            bookButton.textContent = "Book This Flight";
+            bookButton.type = "button";
+            bookButton.addEventListener("click", () => {
+                document.getElementById("flightNumber").value = flight.no;
+                document.getElementById("bookingPanel").scrollIntoView({
+                    behavior: "smooth"
+                });
+                document.getElementById("passengerName").focus();
+            });
+
+            card.append(title, route, seats, price, bookButton);
+            list.appendChild(card);
+        });
+    }
+
+    function searchFlights() {
+        const destination = document
+            .getElementById("destination")
+            .value.trim()
+            .toLowerCase();
+
+        let result = flights.filter(flight =>
+            flight.destination.toLowerCase().includes(destination)
+        );
+
+        // Searching is implemented here using JavaScript array filtering.
+        // The Python Linear Search algorithm is in the Python project.
+
+        if (document.getElementById("sortOption").value === "price") {
+            result.sort((a, b) => a.price - b.price);
+        }
+
+        displayFlights(result);
+    }
+
+    function resetFlights() {
+        document.getElementById("destination").value = "";
+        document.getElementById("sortOption").value = "default";
+        displayFlights(flights);
+    }
+
+    document.getElementById("sortOption").addEventListener("change", () => {
+        searchFlights();
+    });
+
+    document.getElementById("bookingForm").addEventListener(
+        "submit",
+        function(event) {
+            event.preventDefault();
+
+            const name = document
+                .getElementById("passengerName")
+                .value.trim();
+
+            const number = Number(
+                document.getElementById("flightNumber").value
+            );
+
+            const count = Number(
+                document.getElementById("ticketCount").value
+            );
+
+            const flight = flights.find(f => f.no === number);
+            const message = document.getElementById("message");
+
+            if (!name || !Number.isInteger(count) || count <= 0) {
+                message.textContent = "Please enter valid booking details.";
+                return;
+            }
+
+            if (!flight) {
+                message.textContent = "Flight not found.";
+                return;
+            }
+
+            if (flight.seats < count) {
+                message.textContent =
+                    `Only ${flight.seats} seat(s) are available.`;
+                return;
+            }
+
+            flight.seats -= count;
+
+            const booking = {
+                id: bookings.length + 1,
+                name: name,
+                flight: flight.no,
+                tickets: count,
+                total: flight.price * count
+            };
+
+            bookings.push(booking);
+
+            message.replaceChildren();
+
+            const heading = document.createElement("h3");
+            heading.textContent = "✅ Booking Successful!";
+
+            const details = document.createElement("p");
+            details.textContent =
+                `Booking ID: ${booking.id} | Passenger: ${booking.name} | ` +
+                `Flight: ${booking.flight} | Tickets: ${booking.tickets} | ` +
+                `Total: ₹${booking.total.toLocaleString("en-IN")}`;
+
+            message.append(heading, details);
+
+            displayFlights(flights);
+            this.reset();
+        }
+    );
+
+    displayFlights(flights);
+</script>
+
+</body>
+</html>
+```
